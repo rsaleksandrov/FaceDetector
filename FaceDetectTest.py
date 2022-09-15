@@ -2,24 +2,33 @@
 Based on example face detect from http://dlib.net/face_detector.py.html
 """
 
-import sys
-
+import cv2
 import dlib
 
 detector = dlib.get_frontal_face_detector()
-win = dlib.image_window()
+# win = dlib.image_window()
+cap = cv2.VideoCapture(0)
 
-imageFile = r'C:\Work\Programming\Python\Temp\dlib_face_detector_training_data\images\Abdulaziz_Kamilov\Abdulaziz_Kamilov_0001.jpg'
-img = dlib.load_rgb_image(imageFile)
-dets = detector(img, 1)
-print(f'Detect {len(dets)} faces')
-for i, d in enumerate(dets):
-    print("Detection {}: Left: {} Top: {} Right: {} Bottom: {}".format(
-        i, d.left(), d.top(), d.right(), d.bottom()))
-win.clear_overlay()
-win.set_image(img)
-win.add_overlay(dets)
-dlib.hit_enter_to_continue()
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print('Can`t capture frame')
+        break
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    dets = detector(gray, 1)
+    # dets, scores, idx = detector.run(gray, 1, -1)
+    # for i, d in enumerate(dets):
+    #     print("Detection {}, score: {}, face_type:{}".format(d, scores[i],
+    #                                                          idx[i]))
+    for d in dets:
+        cv2.rectangle(frame, (d.left(), d.top()), (d.right(), d.bottom()),
+                      (0, 0, 255), 2)
+    cv2.imshow('Faces detect', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cap.release()
+cv2.destroyAllWindows()
 
 # for f in sys.argv[1:]:
 #     print("Processing file: {}".format(f))
